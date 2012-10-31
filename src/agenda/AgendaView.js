@@ -171,6 +171,9 @@ function AgendaView(element, calendar, viewName) {
 		var maxd;
 		var minutes;
 		var slotNormal = opt('slotMinutes') % 15 == 0;
+        var startOfBusiness;
+        var endOfBusiness;
+        var nonBusinessHours;
 
 		s =
 			"<table style='width:100%' class='fc-agenda-days fc-border-separate' cellspacing='0'>" +
