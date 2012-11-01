@@ -37,7 +37,7 @@ concat_js = \
 		| ${VER_SED} \
 		| ${DATE_SED} \
 		> "$(2)"
-	
+
 concat_css = \
 	files=$$(cat "$(1)/_loader.js" | ${CSS_SED}); \
 	if [ "$$files" ]; then \
@@ -47,12 +47,12 @@ concat_css = \
 			| ${DATE_SED} \
 			> "$(2)"; \
 	fi
-	
+
 zip:
 	@rm -rf ${BUILD_DIR}/fullcalendar
 	@rm -rf ${BUILD_DIR}/fullcalendar-*
 	@mkdir -p ${BUILD_DIR}/fullcalendar/fullcalendar/
-	
+
 	@echo "building core..."
 	@$(call concat_js,${SRC_DIR},"${BUILD_DIR}/fullcalendar/fullcalendar/fullcalendar.js")
 	@$(call concat_css,${SRC_DIR},"${BUILD_DIR}/fullcalendar/fullcalendar/fullcalendar.css")
@@ -60,24 +60,24 @@ zip:
 		| ${VER_SED} \
 		| ${DATE_SED} \
 		> "${BUILD_DIR}/fullcalendar/fullcalendar/fullcalendar.print.css"
-	
+
 	@echo "compressing core js..."
 	@java -jar ${BUILD_DIR}/compiler.jar --warning_level VERBOSE --jscomp_off checkTypes --externs build/externs.js \
 		--js ${BUILD_DIR}/fullcalendar/fullcalendar/fullcalendar.js \
 		> ${BUILD_DIR}/fullcalendar/fullcalendar/fullcalendar.min.js; \
-		
+
 	@echo "building plugins..."
 	@for loader in ${SRC_DIR}/*/_loader.js; do \
 		dir=`dirname $$loader`; \
 		name=`basename $$dir`; \
 		$(call concat_js,$$dir,"${BUILD_DIR}/fullcalendar/fullcalendar/$$name.js"); \
 	done
-	
+
 	@echo "copying jquery..."
 	@mkdir -p ${BUILD_DIR}/fullcalendar/jquery
 	@cp lib/${JQ} ${BUILD_DIR}/fullcalendar/jquery
 	@cp lib/${JQUI} ${BUILD_DIR}/fullcalendar/jquery
-	
+
 	@echo "building demos..."
 	@mkdir -p ${BUILD_DIR}/fullcalendar/demos
 	@for f in ${DEMO_FILES}; do \
@@ -90,23 +90,27 @@ zip:
 	@for d in ${DEMO_SUBDIRS}; do \
 		cp -r ${DEMOS_DIR}/$$d ${BUILD_DIR}/fullcalendar/demos/$$d; \
 	done
-	
+
 	@echo "copying other files..."
 	@cp -r ${OTHER_FILES} ${BUILD_DIR}/fullcalendar
-	
+
 	@echo "zipping..."
 	@mv ${BUILD_DIR}/fullcalendar ${BUILD_DIR}/fullcalendar-${VER}
 	@cd ${BUILD_DIR}; for f in fullcalendar-*; do \
 		zip -q -r $$f.zip $$f; \
 		done
 	@mv ${BUILD_DIR}/fullcalendar-${VER} ${BUILD_DIR}/fullcalendar
-	
+
 	@mkdir -p ${DIST_DIR}
 	@mv ${BUILD_DIR}/fullcalendar-${VER}.zip ${DIST_DIR}
+
+	@echo "updating KitovuRetailer..."
+	@rm -rf ../KitovuRetailerApp/kitovu_retailer/assets/fullcalendar
+	@cp -R ${BUILD_DIR}/fullcalendar/fullcalendar ../KitovuRetailerApp/kitovu_retailer/assets/
 	@echo "done."
 
 clean:
 	@rm -rf ${BUILD_DIR}/fullcalendar
 	@rm -rf ${BUILD_DIR}/fullcalendar-*
 	@rm -rf ${DIST_DIR}/*
-	
+
